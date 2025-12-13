@@ -22,9 +22,11 @@ app.use((req, res, next) => {
 
 const user = require("./routes/user")
 const product = require("./routes/product")
+const admin = require("./admin/admiNRoute")
 
 app.use("/user" , user)
 app.use("/product" , product)
+app.use("/admin" , admin)
 
 app.listen(process.env.PORT , ()=>{
     console.log(`Server is running on ${process.env.PORT}`);
