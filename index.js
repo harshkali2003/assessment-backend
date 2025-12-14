@@ -9,7 +9,7 @@ const app = express();
 app.use(express.json())
 
 app.use(cors({
-    origin : "*",
+    origin : "http://localhost:3000",
     credentials : true,
     methods : ["GET" , "POST" , "PUT" , "PATCH" , "DELETE"]
 }))
@@ -20,13 +20,13 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use("/uploads" , express.static("uploads"))
+
 const user = require("./routes/user")
 const product = require("./routes/product")
-const admin = require("./admin/admiNRoute")
 
 app.use("/user" , user)
 app.use("/product" , product)
-app.use("/admin" , admin)
 
 app.listen(process.env.PORT , ()=>{
     console.log(`Server is running on ${process.env.PORT}`);

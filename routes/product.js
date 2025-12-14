@@ -1,24 +1,54 @@
-const express = require("express")
+const express = require("express");
 
-const productController = require("../controllers/productController")
-const businessLogic = require("../services/businessLogic")
-const upload = require("../config/multer")
-const {verifyAdminToken} = require("../middlewares/jwtMiddleware")
+const productController = require("../controllers/productController");
+const businessLogic = require("../services/businessLogic");
+const upload = require("../config/multer");
+const { verifyToken } = require("../middlewares/jwtMiddleware");
 
-const router = express.Router()
+const router = express.Router();
 
-router.post("/add" , upload.single("image") , verifyAdminToken , productController.addProduct)
+router.post(
+  "/add",
+   verifyToken,
+  upload.single("image"),
+  productController.addProduct
+);
 
-router.get("/" , productController.getProduct)
+router.patch(
+  "/purchase/:productId",
+  verifyToken,
+  productController.purchaseProduct
+);
 
-router.get("/search/:query" , productController.searchProduct)
+router.get("/", productController.getProduct);
 
-router.put("/edit/:productId" , upload.single("image") , verifyAdminToken , productController.editProduct)
+router.get("/item/:id" , verifyToken , productController.getProductById)
 
-router.delete("/delete/:productId" , verifyAdminToken , productController.deleteProduct)
+router.get("/search", productController.searchProduct);
 
-router.post("/stock/increase/:productId" , verifyAdminToken , businessLogic.increaseStock)
+router.put(
+  "/edit/:productId",
+  verifyToken,
+  upload.single("image"),
+  productController.editProduct
+);
 
-router.post("/stock/decrease/:productId" , verifyAdminToken , businessLogic.decreaseStock)
+router.delete(
+  "/delete/:productId",
+  verifyToken,
+  productController.deleteProduct
+);
+
+router.post(
+  "/stock/increase/:productId",
+  verifyToken,
+  businessLogic.increaseStock
+);
+
+router.post(
+  "/stock/decrease/:productId",
+  verifyToken,
+  businessLogic.decreaseStock
+);
 
 module.exports = router;

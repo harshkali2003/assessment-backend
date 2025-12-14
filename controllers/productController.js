@@ -13,14 +13,13 @@ exports.addProduct = async (req , resp) => {
         }
 
         const filename = req.file.filename;
-        const filedata = `products/${filename}`
 
         const data = await Product.create({
             name,
             category,
             price,
             quantity,
-            image : filedata
+            image : filename
         })
 
         if(!data){
@@ -33,6 +32,32 @@ exports.addProduct = async (req , resp) => {
         resp.status(500).json({message : "Internal server error"})
     }
 }
+
+exports.purchaseProduct = async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    if (product.quantity <= 0) {
+      return res.status(400).json({ message: "Out of stock" });
+    }
+
+    product.quantity -= 1;
+    await product.save();
+
+    res.status(200).json({
+      message: "Purchase successful",
+      product,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 exports.getProduct = async (req , resp) => {
     try{
@@ -71,7 +96,7 @@ exports.searchProduct = async (req , resp) => {
 
         const data = await Product.find(filter)
 
-        if(!data){
+        if(data.length === 0){
             return resp.status(404).json({message : "Nothing match to given query"})
         }
 
@@ -101,7 +126,7 @@ exports.getProductById = async (req , resp) => {
 
 exports.editProduct = async (req , resp) => {
     try{
-        const {id} = req.params;
+        const {productId} = req.params;
 
         const { name , category , price } = req.body;
 
@@ -112,11 +137,11 @@ exports.editProduct = async (req , resp) => {
         const updatedData = {name , category , price}
 
         if(req.file){
-            updatedData.image = `/products/${req.file.filename}`
+            updatedData.image = `${req.file.filename}`
         }
 
         const data = await Product.findByIdAndUpdate(
-            id,
+            productId,
             {$set : updatedData},
             {new : true}
         )
@@ -134,9 +159,9 @@ exports.editProduct = async (req , resp) => {
 
 exports.deleteProduct = async (req , resp) => {
     try{
-        const {id} = req.params;
+        const {productId} = req.params;
 
-        const data = await Product.findByIdAndDelete(id)
+        const data = await Product.findByIdAndDelete(productId)
 
         if(!data){
             return resp.status(404).json({message : "No product found by the given id"})
